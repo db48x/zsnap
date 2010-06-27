@@ -109,10 +109,10 @@ class FSInfo
   end
 
   def snapshots(prefix)
-    path = File.join(mount_point, '.zfs', 'snapshot')
-    Dir.open(path).select do |name|
-      name[0, prefix.length] == prefix
-    end.map { |name| SnapshotInfo.new(name, @name, prefix) }
+    cprefix = "#{@name}@#{prefix}"
+    `zfs list -r -d 1 -t snapshot -o name -H #{@name}`.select do |name|
+      name[0, cprefix.length] == cprefix
+    end.map { |name| SnapshotInfo.new(name[@name.length+1 .. -1], @name, prefix) }
   end
 
   def snapshots_to_remove(now_minutes, prefix)
